@@ -1,3 +1,10 @@
+<img width="1536" height="777" alt="Screenshot 2026-10-06 092918" src="https://github.com/user-attachments/assets/73dca9c3-7977-47da-a4f5-0b98980100bb" />
+
+<img width="1485" height="851" alt="Screenshot 2026-10-06 092936" src="https://github.com/user-attachments/assets/81599a54-4a5f-4c2b-8e08-968bbeb2f47f" />
+
+<img width="1485" height="851" alt="Screenshot 2026-10-06 092936" src="https://github.com/user-attachments/assets/1e4f20cd-3c9d-4169-8243-c6b2f9301aab" />
+
+
 \# Hybrid Driver Drowsiness Detection
 
 
