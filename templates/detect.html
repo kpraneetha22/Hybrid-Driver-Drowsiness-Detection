@@ -1,0 +1,223 @@
+<!-- templates/detect.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚗 AI Driver Monitoring Dashboard</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --success: #2ecc71;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* full page background image */
+            background: url('https://media.istockphoto.com/id/621601764/photo/driving-car-on-highway.jpg?s=612x612&w=0&k=20&c=_1gmjmw3jScp0mu-rXEmFiMMzwZiZbAUi9Mo2aIyvg0=') no-repeat center center fixed;
+            background-size: cover; /* makes image fill the screen */
+            color: white;           /* ensures text is readable */
+            min-height: 100vh;
+            padding: 20px;
+}
+        .navbar {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .navbar h1 {
+            font-size: 2.4rem;
+            margin-bottom: 10px;
+            color: black; /* change text color to black */
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .nav-buttons {
+            margin-top: 15px;
+        }
+        .btn {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1.1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            margin: 0 8px;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.3);
+        }
+        .btn-danger { background: var(--danger); }
+        .btn-warning { background: var(--warning); color: #2c3e50; }
+        .btn-success { background: var(--success); }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+        .card {
+            background: rgba(0,0,0,0.6); /* darker overlay */
+            backdrop-filter: blur(12px);
+            border-radius: 14px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            color: #f1f1f1; /* light text inside card */
+        }
+        .video-container {
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 20px auto;
+            display: block;
+            width: 100%;
+            max-width: 900px;
+        }
+        .counters {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 25px 0;
+        }
+        .counter-box {
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            padding: 20px;
+            min-width: 180px;
+            text-align: center;
+            flex: 1;
+        }
+        .counter-box h3 {
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+        .counter-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+        }
+        .drowsy-box { border-left: 4px solid var(--danger); }
+        .yawn-box { border-left: 4px solid var(--warning); }
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+        }
+        .alert-danger { 
+            background: rgba(231, 76, 60, 0.2); 
+            border: 1px solid var(--danger);
+            color: #ffcccc;
+        }
+        .alert-warning { 
+            background: rgba(243, 156, 18, 0.2); 
+            border: 1px solid var(--warning);
+            color: #ffebcc;
+        }
+        .instructions {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+        @media (max-width: 600px) {
+            .btn { display: block; margin: 8px auto; width: 90%; }
+            .counters { flex-direction: column; }
+            .navbar h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="navbar">
+            <h1>🚗 AI Driver Monitoring Dashboard</h1>
+            <div class="nav-buttons">
+                <a href="/" class="btn">🏠 Back to Safety Briefing</a>
+                <button class="btn btn-danger" onclick="resetCounters()">🔄 Reset Counters</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 style="text-align: center; margin-bottom: 20px;">Real-Time AI Driver Monitoring</h2>
+            
+            <div class="video-container">
+                <img src="{{ url_for('video_feed') }}" width="100%">
+            </div>
+
+            <div class="counters">
+                <div class="counter-box drowsy-box">
+                    <h3>😴 Drowsiness</h3>
+                    <div class="counter-value" id="drowsy-count">0</div>
+                    <div>Threshold: 70</div>
+                </div>
+                <div class="counter-box yawn-box">
+                    <h3>🥱 Yawning</h3>
+                    <div class="counter-value" id="yawn-count">0</div>
+                    <div>Threshold: 30</div>
+                </div>
+            </div>
+
+            <div class="alert alert-danger" id="huge-alert">
+                🚨 DRIVER IS SLEEPY — STOP VEHICLE IMMEDIATELY!
+            </div>
+            <div class="alert alert-warning" id="yawn-alert">
+                ⚠️ YAWN ALERT — Please take fresh air
+            </div>
+
+            <div class="instructions">
+                <p><strong>How it works:</strong> System monitors eye closure (EAR) and mouth opening (yawn distance).</p>
+                <p>• Drowsiness Count ↑ when eyes closed<br>
+                   • Yawning Count ↑ when mouth widely open<br>
+                   • At 70 threshold drowsiness → Buzzer<br>
+                   • At 30 threshold yawning → Audio alert</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const drowsyEl = document.getElementById('drowsy-count');
+        const yawnEl = document.getElementById('yawn-count');
+        const hugeAlert = document.getElementById('huge-alert');
+        const yawnAlert = document.getElementById('yawn-alert');
+
+        function updateStatus() {
+            fetch('/status')
+                .then(response => response.json())
+                .then(data => {
+                    drowsyEl.textContent = data.drowsy_count;
+                    yawnEl.textContent = data.yawn_count;
+
+                    hugeAlert.style.display = data.drowsy_alerted ? 'block' : 'none';
+                    yawnAlert.style.display = data.yawn_alerted ? 'block' : 'none';
+                })
+                .catch(err => console.error('Status fetch failed:', err));
+        }
+
+        function resetCounters() {
+            fetch('/reset')
+                .then(() => {
+                    drowsyEl.textContent = '0';
+                    yawnEl.textContent = '0';
+                    hugeAlert.style.display = 'none';
+                    yawnAlert.style.display = 'none';
+                });
+        }
+
+        setInterval(updateStatus, 500);
+        updateStatus();
+    </script>
+</body>
+</html>

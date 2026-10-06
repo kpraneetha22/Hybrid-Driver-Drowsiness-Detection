@@ -1,0 +1,21 @@
+﻿venv/
+__pycache__/
+*.pyc
+.env
+*.env
+.vscode/
+.idea/
+*.h5
+*.keras
+*.pt
+*.pth
+*.onnx
+.DS_Store
+
+.venv/
+
+
+Neetha Final/
+PyWhatKit_DB.txt
+.vscode/
+

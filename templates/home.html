@@ -1,0 +1,244 @@
+<!-- templates/home.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚗 Driver Drowsiness Detection System</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --success: #2ecc71;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: url('https://media.istockphoto.com/id/621601764/photo/driving-car-on-highway.jpg?s=612x612&w=0&k=20&c=_1gmjmw3jScp0mu-rXEmFiMMzwZiZbAUi9Mo2aIyvg0=')
+                no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .navbar {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .navbar h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.7); /* stronger shadow */
+            color: #000000; /* bright yellow for visibility */
+        }
+        .nav-buttons {
+            margin-top: 15px;
+        }
+        .btn {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1.1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            margin: 0 8px;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.3);
+        }
+        .btn-danger { background: var(--danger); }
+        .btn-warning { background: var(--warning); color: #2c3e50; }
+        .btn-success { background: var(--success); }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .card {
+            background: rgba(0, 0, 0, 0.6);  /* darker semi-transparent black */
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);  /* slightly darker shadow */
+            text-align: center;
+            color: #f1f1f1;  /* text inside card is light for readability */
+        }
+        .progress {
+            width: 100%;
+            height: 12px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        #bar {
+            height: 100%;
+            background: var(--success);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .tip {
+            font-size: 1.3rem;
+            margin: 15px 0;
+            padding: 12px;
+            background: rgba(0,0,0,0.2);
+            border-left: 4px solid var(--warning);
+            border-radius: 0 6px 6px 0;
+        }
+        #status {
+            font-size: 1.2rem;
+            min-height: 2rem;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+        @media (max-width: 600px) {
+            .btn { display: block; margin: 8px auto; width: 90%; }
+            .navbar h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="navbar">
+            <h1> Driver Drowsiness Detection System</h1>
+            <div class="nav-buttons">
+                <a href="/detect" class="btn btn-success">
+                ▶️ Start Driver Monitoring
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            
+
+            <h2 style="text-align: center; margin-bottom: 20px;">🛡️ Safety Briefing</h2>
+            
+            <div class="tip">✅ Take a break every 2 hours</div>
+            <div class="tip">✅ Avoid driving between 2–6 AM</div>
+            <div class="tip">✅ Stay hydrated & avoid heavy meals</div>
+            <div class="tip">✅ Use sunglasses to reduce glare</div>
+            <div class="tip">✅ Pull over IMMEDIATELY if drowsy</div>
+
+            <div class="progress">
+                <div id="bar"></div>
+            </div>
+            <div id="status">🔊 Starting safety briefing...</div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button id="skipBtn" class="btn btn-warning" onclick="skipBriefing()">
+                    ⏩ Skip & Start Monitoring Now
+                </button>
+            </div>
+
+            <div id="restartSection" style="display:none; margin-top: 20px; text-align: center;">
+                <button class="btn" onclick="restartBriefing()">
+                    🔁 Replay Safety Tips
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tips = [
+            "Tip one: Take a mandatory 15-minute break every 2 hours of continuous driving.",
+            "Tip two: Avoid driving during high-risk drowsiness hours—especially between 2 and 6 AM.",
+            "Tip three: Stay hydrated, but avoid large meals that cause drowsiness.",
+            "Tip four: Use polarized sunglasses to reduce sun glare and eye strain.",
+            "Tip five: If you feel drowsy—even slightly—pull over safely and rest immediately.",
+            "The Drowsiness Detection System will now activate to monitor your alertness in real-time.",
+            "Stay safe, and thank you for prioritizing road safety."
+        ];
+
+        let index = 0;
+        let isPlaying = true;
+        const statusEl = document.getElementById('status');
+        const barEl = document.getElementById('bar');
+        const skipBtn = document.getElementById('skipBtn');
+        const restartSection = document.getElementById('restartSection');
+
+        function updateStatus(msg) {
+            statusEl.textContent = msg;
+        }
+
+        function updateProgress() {
+            const progress = (index / tips.length) * 100;
+            barEl.style.width = `${progress}%`;
+        }
+
+        function speakNext() {
+            if (!isPlaying || index >= tips.length) {
+                if (index >= tips.length) {
+                    updateStatus("✅ Safety briefing complete. Redirecting to monitoring...");
+                    barEl.style.width = '100%';
+                    skipBtn.textContent = "✅ Start Monitoring Now";
+                    restartSection.style.display = 'inline-block';
+                    setTimeout(() => {
+                        if (isPlaying) window.location.href = '/detect';
+                    }, 1500);
+                }
+                return;
+            }
+
+            const msg = new SpeechSynthesisUtterance(tips[index]);
+            msg.rate = 0.95;
+            msg.pitch = 1.0;
+
+            msg.onstart = () => {
+                updateStatus(`🔊 Tip ${index + 1}/${tips.length}: "${tips[index].substring(0, 35)}..."`);
+                updateProgress();
+            };
+
+            msg.onend = () => {
+                index++;
+                if (isPlaying) setTimeout(speakNext, 400);
+            };
+
+            msg.onerror = (e) => {
+                console.error("Speech error:", e);
+                updateStatus("⚠️ Voice failed. You can skip or restart.");
+                skipBtn.textContent = "✅ Start Monitoring Anyway";
+                restartSection.style.display = 'inline-block';
+                isPlaying = false;
+            };
+
+            speechSynthesis.speak(msg);
+        }
+
+        function skipBriefing() {
+            isPlaying = false;
+            speechSynthesis.cancel();
+            updateStatus("⏭️ Skipping to monitoring...");
+            barEl.style.width = '100%';
+            setTimeout(() => {
+                window.location.href = '/detect';
+            }, 300);
+        }
+
+        function restartBriefing() {
+            isPlaying = true;
+            index = 0;
+            speechSynthesis.cancel();
+            restartSection.style.display = 'none';
+            skipBtn.textContent = "⏩ Skip & Start Monitoring Now";
+            updateStatus("🔄 Restarting safety briefing...");
+            speakNext();
+        }
+
+        window.addEventListener('load', () => {
+            speechSynthesis.cancel();
+            setTimeout(speakNext, 800);
+        });
+    </script>
+</body>
+</html>
